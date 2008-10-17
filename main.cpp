@@ -5,6 +5,7 @@
 #include <KMessageBox>
 #include <KUrl>
 #include <QFile> 
+#include <QTextEdit>
 
 int main (int argc, char *argv[])
 {
@@ -37,5 +38,8 @@ int main (int argc, char *argv[])
     kDebug() << inputfilecontent;
     QString inputfilecontentqstring(inputfilecontent);
     kDebug() << inputfilecontentqstring;
+    QTextEdit* textedit=new QTextEdit();
+    textedit->setText(inputfilecontentqstring);
+    kDebug() << textedit->toHtml();
   }
 }
