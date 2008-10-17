@@ -18,6 +18,11 @@ int main (int argc, char *argv[])
                          "bugs@staerk.de");
  
     KCmdLineArgs::init( argc, argv, &aboutData );
+    KCmdLineOptions options; 
+    options.add("+[file]", ki18n("Document to open")); 
+    KCmdLineArgs::addCmdLineOptions(options); 
+
+
     KApplication app;
     KGuiItem yesButton( i18n( "Hello" ), QString(),
                         i18n( "This is a tooltip" ),
