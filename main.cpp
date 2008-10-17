@@ -1,7 +1,9 @@
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
+#include <kdebug.h>
 #include <KMessageBox>
+#include <KUrl>
  
 int main (int argc, char *argv[])
 {
@@ -21,12 +23,11 @@ int main (int argc, char *argv[])
     KCmdLineOptions options; 
     options.add("+[file]", ki18n("Document to open")); 
     KCmdLineArgs::addCmdLineOptions(options); 
-
+    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 
     KApplication app;
-    KGuiItem yesButton( i18n( "Hello" ), QString(),
-                        i18n( "This is a tooltip" ),
-                        i18n( "This is a WhatsThis help text." ) );
-    KMessageBox::questionYesNo( 0, i18n( "Hello World" ),
-                                i18n( "Hello" ), yesButton );
+    if (args->count()) 
+    {
+      kDebug() << args->url(0).url();
+    }
 }
