@@ -1,3 +1,4 @@
+#include <iostream>
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
@@ -5,6 +6,7 @@
 #include <KMessageBox>
 #include <KUrl>
 #include <QFile> 
+#include <QDomDocument>
 #include <QTextEdit>
 
 int main (int argc, char *argv[])
@@ -26,7 +28,7 @@ int main (int argc, char *argv[])
   options.add("+[file]", ki18n("Document to open")); 
   KCmdLineArgs::addCmdLineOptions(options); 
   KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-
+  QByteArray inputfilecontent;
   KApplication app;
   if (args->count()) 
   {
@@ -34,12 +36,16 @@ int main (int argc, char *argv[])
     QFile inputfile(args->url(0).fileName());
     inputfile.open(QIODevice::ReadOnly);
     kDebug() << inputfile.bytesAvailable();
-    QByteArray inputfilecontent = inputfile.read(inputfile.bytesAvailable());
+    inputfilecontent = inputfile.read(inputfile.bytesAvailable());
     kDebug() << inputfilecontent;
     QString inputfilecontentqstring(inputfilecontent);
     kDebug() << inputfilecontentqstring;
     QTextEdit* textedit=new QTextEdit();
     textedit->setText(inputfilecontentqstring);
     kDebug() << textedit->toHtml();
+    std::cout << textedit->toHtml().toStdString() << std::endl;
   }
+  QDomDocument mydom=QDomDocument();
+  mydom.setContent(inputfilecontent);
+  kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
 }
