@@ -9,6 +9,13 @@
 #include <QDomDocument>
 #include <QTextEdit>
 
+void output(QDomNode node)
+{
+  kDebug() << node.nodeName();
+  if (node.hasChildNodes()) output(node.firstChild());
+  kDebug() << node.nodeName();
+}
+
 int main (int argc, char *argv[])
 {
   KAboutData aboutData(
@@ -48,4 +55,17 @@ int main (int argc, char *argv[])
   QDomDocument mydom=QDomDocument();
   mydom.setContent(inputfilecontent);
   kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
+  QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
+  kDebug() << htmlnode.firstChild().nodeName();
+  QDomNode bodynode(mydom.elementsByTagName("body").at(0));
+  kDebug() << bodynode.firstChild().nodeName();
+  QDomNode node=bodynode;
+  while (node.hasChildNodes()) 
+  {
+    node=node.firstChild();
+    kDebug() << node.nodeName();
+  }
+  output(bodynode);
+  kDebug() << "out";
 }
+
