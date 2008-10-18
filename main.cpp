@@ -11,8 +11,12 @@
 
 void output(QDomNode node)
 {
+  QDomNode next;
   kDebug() << node.nodeName();
-  if (node.hasChildNodes()) output(node.firstChild());
+  if (node.hasChildNodes()) 
+  {
+    for (int i=0; i<=node.childNodes().count(); i++) output(node.childNodes().at(i));
+  }
   kDebug() << node.nodeName();
 }
 
