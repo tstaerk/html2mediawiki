@@ -28,8 +28,7 @@ void output(QDomNode node)
 
 int main (int argc, char *argv[])
 {
-  KAboutData aboutData(
-			"html2mediawiki",
+  KAboutData aboutData( "html2mediawiki",
 			0,
 			ki18n("html2mediawiki"),
 			"0.1",
@@ -39,7 +38,6 @@ int main (int argc, char *argv[])
 			ki18n("This is html2mediawiki"),
 			"http://www.staerk.de/thorsten",
 			"bugs@staerk.de");
-
   KCmdLineArgs::init( argc, argv, &aboutData );
   KCmdLineOptions options; 
   options.add("+[file]", ki18n("Document to open")); 
@@ -53,22 +51,21 @@ int main (int argc, char *argv[])
     kDebug() << args->url(0).url();
     QFile inputfile(args->url(0).fileName());
     inputfile.open(QIODevice::ReadOnly);
-    kDebug() << inputfile.bytesAvailable();
     inputfilecontent = inputfile.read(inputfile.bytesAvailable());
-    kDebug() << endl << endl << "inputfilecontent is " << endl << inputfilecontent;
     QString inputfilecontentqstring(inputfilecontent);
     kDebug() << inputfilecontentqstring;
     textedit->setHtml(inputfilecontentqstring);
     kDebug() << textedit->toHtml();
+    QDomDocument mydom=QDomDocument();
+    mydom.setContent(textedit->toHtml());
+    kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
+    QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
+    kDebug() << htmlnode.firstChild().nodeName();
+    QDomNode bodynode(mydom.elementsByTagName("body").at(0));
+    kDebug() << bodynode.firstChild().nodeName();
+    QDomNode node=bodynode;
+    output(bodynode);
   }
-  QDomDocument mydom=QDomDocument();
-  mydom.setContent(textedit->toHtml());
-  kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
-  QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
-  kDebug() << htmlnode.firstChild().nodeName();
-  QDomNode bodynode(mydom.elementsByTagName("body").at(0));
-  kDebug() << bodynode.firstChild().nodeName();
-  QDomNode node=bodynode;
-  output(bodynode);
+  else std::cout << "html2mediawiki usage: html2mediawiki <htmlfile>" << std::endl;
 }
 
