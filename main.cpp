@@ -17,7 +17,7 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << "= ";
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.isText()) kDebug() << node.nodeValue();
-  if (node.isText()) std::cout << node.nodeValue().toStdString();
+  if (node.isText()) std::cout << QString(node.nodeValue().toLocal8Bit()).toStdString();
   if (node.hasChildNodes()) 
   {
     for (int i=0; i<=node.childNodes().count(); ++i) output(node.childNodes().at(i));
@@ -60,7 +60,6 @@ int main (int argc, char *argv[])
     kDebug() << inputfilecontentqstring;
     textedit->setHtml(inputfilecontentqstring);
     kDebug() << textedit->toHtml();
-    std::cout << textedit->toHtml().toStdString() << std::endl;
   }
   QDomDocument mydom=QDomDocument();
   mydom.setContent(textedit->toHtml());
@@ -70,12 +69,6 @@ int main (int argc, char *argv[])
   QDomNode bodynode(mydom.elementsByTagName("body").at(0));
   kDebug() << bodynode.firstChild().nodeName();
   QDomNode node=bodynode;
-  while (node.hasChildNodes()) 
-  {
-    node=node.firstChild();
-    kDebug() << node.nodeName();
-  }
   output(bodynode);
-  kDebug() << "out";
 }
 
