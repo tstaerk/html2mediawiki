@@ -14,12 +14,14 @@ void output(QDomNode node)
   QDomNode next;
   kDebug() << node.nodeName();
   if (node.nodeName()=="li") std::cout << "\n* ";
+  if (node.nodeName()=="h1") std::cout << "= ";
   if (node.isText()) kDebug() << node.nodeValue();
   if (node.isText()) std::cout << node.nodeValue().toStdString();
   if (node.hasChildNodes()) 
   {
     for (int i=0; i<=node.childNodes().count(); ++i) output(node.childNodes().at(i));
   }
+  if (node.nodeName()=="h1") std::cout << " =";
 }
 
 int main (int argc, char *argv[])
@@ -54,7 +56,7 @@ int main (int argc, char *argv[])
     QString inputfilecontentqstring(inputfilecontent);
     kDebug() << inputfilecontentqstring;
     QTextEdit* textedit=new QTextEdit();
-    textedit->setText(inputfilecontentqstring);
+    textedit->setHtml(inputfilecontentqstring);
     kDebug() << textedit->toHtml();
     std::cout << textedit->toHtml().toStdString() << std::endl;
   }
