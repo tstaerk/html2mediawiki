@@ -17,7 +17,6 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << "= ";
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.isText()) kDebug() << node.nodeValue();
-  if (node.nodeValue()=="heading 1") std::cout << "= ";
   if (node.isText()) std::cout << QString(node.nodeValue().toLocal8Bit()).toStdString();
   if (node.hasChildNodes()) 
   {
@@ -25,7 +24,18 @@ void output(QDomNode node)
   }
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.nodeName()=="h1") std::cout << " =";
-  if (node.nodeValue()=="heading 1") std::cout << " =";
+}
+
+QString cleanwithtextedit(QString text)
+{
+  QTextEdit* textedit=new QTextEdit();
+  textedit->setHtml(text);
+  return textedit->toHtml();
+}
+
+QString clean(QString text)
+{
+  return cleanwithtextedit(text);
 }
 
 int main (int argc, char *argv[])
@@ -47,7 +57,6 @@ int main (int argc, char *argv[])
   KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
   QByteArray inputfilecontent;
   KApplication app;
-  QTextEdit* textedit=new QTextEdit();
   if (args->count()) 
   {
     kDebug() << args->url(0).url();
@@ -55,11 +64,8 @@ int main (int argc, char *argv[])
     inputfile.open(QIODevice::ReadOnly);
     inputfilecontent = inputfile.read(inputfile.bytesAvailable());
     QString inputfilecontentqstring(inputfilecontent);
-    kDebug() << inputfilecontentqstring;
-    textedit->setHtml(inputfilecontentqstring);
-    kDebug() << textedit->toHtml();
     QDomDocument mydom=QDomDocument();
-    mydom.setContent(textedit->toHtml());
+    mydom.setContent(clean(inputfilecontentqstring));
     kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
     QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
     kDebug() << htmlnode.firstChild().nodeName();
