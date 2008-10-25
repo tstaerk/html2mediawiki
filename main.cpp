@@ -17,6 +17,7 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << "= ";
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.isText()) kDebug() << node.nodeValue();
+  if (node.nodeValue()=="heading 1") std::cout << "= ";
   if (node.isText()) std::cout << QString(node.nodeValue().toLocal8Bit()).toStdString();
   if (node.hasChildNodes()) 
   {
@@ -24,6 +25,7 @@ void output(QDomNode node)
   }
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.nodeName()=="h1") std::cout << " =";
+  if (node.nodeValue()=="heading 1") std::cout << " =";
 }
 
 int main (int argc, char *argv[])
