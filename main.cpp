@@ -19,7 +19,8 @@ void output(QDomNode node)
   QDomNode next;
   kDebug() << node.nodeName();
   if (node.nodeName()=="li") std::cout << "\n* ";
-  if (node.nodeName()=="h1") std::cout << "= ";
+  if (node.nodeName()=="h1") std::cout << "\n= ";
+  if (node.nodeName()=="h2") std::cout << "\n== ";
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.isText()) kDebug() << node.nodeValue();
   if (node.isText()) std::cout << QString(node.nodeValue().toLocal8Bit()).toStdString();
@@ -29,6 +30,7 @@ void output(QDomNode node)
   }
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.nodeName()=="h1") std::cout << " =";
+  if (node.nodeName()=="h2") std::cout << " ==";
 }
 
 QString tidy(char* input)
