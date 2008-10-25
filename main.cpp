@@ -5,9 +5,14 @@
 #include <kdebug.h>
 #include <KMessageBox>
 #include <KUrl>
+#include <QChar>
 #include <QFile> 
 #include <QDomDocument>
 #include <QTextEdit>
+#include <tidy.h>
+#include <buffio.h>
+#include <stdio.h>
+#include <errno.h>
 
 void output(QDomNode node)
 {
@@ -26,6 +31,122 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << " =";
 }
 
+QString tidy(char* input)
+// take html code and return it converted to xhtml code
+{                                                        
+  kDebug() << "Entering function";                       
+  // the following code is (c) Charles Reitzel and Dave Raggett, see the package tidy                                                                                                                                                             
+  TidyBuffer output = {0};                                                                                               
+  TidyBuffer errbuf = {0};                                                                                               
+  QString result;                                                                                                        
+  int rc = -1;                                                                                                           
+  Bool ok;                                                                                                               
+
+  TidyDoc tdoc = tidyCreate();                             // Initialize "document"
+  kDebug() << "Tidying:\t\%s\\n" << input;                                         
+
+  ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
+  if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
+  if ( rc >= 0 ) rc = tidyParseString( tdoc, input );      // Parse the input    
+  if ( rc >= 0 ) rc = tidyCleanAndRepair( tdoc );          // Tidy it up!        
+  if ( rc >= 0 ) rc = tidyRunDiagnostics( tdoc );          // Kvetch             
+  if ( rc > 1 )                                            // If error, force output.
+    rc = ( tidyOptSetBool(tdoc, TidyForceOutput, yes) ? rc : -1 );                   
+  if ( rc >= 0 ) rc = tidySaveBuffer( tdoc, &output );     // Pretty Print           
+  if ( rc >= 0 )                                                                     
+  {                                                                                  
+    if ( rc > 0 ) kDebug() << "\\nDiagnostics:\\n\\n\%s" << errbuf.bp;               
+    char* outputstring; // content of the outputfile                                 
+
+    // find out length of outputstring
+    int length=0; // length of outputstring
+    byte* string=output.bp;                
+    while (*string)                        
+    {                                      
+      string++;                                                
+      length++;                                                
+    }                                                          
+
+    kDebug() << "allocating memory " << length;
+    outputstring=(char*)malloc(length);        
+    snprintf(outputstring,length,"%s",output.bp);
+    result=QString::fromLocal8Bit(outputstring,length);
+  }                                                    
+  else                                                 
+    printf( "A severe error (\%d) occurred.\\n", rc ); 
+  tidyBufFree( &output );                              
+  tidyBufFree( &errbuf );                              
+  tidyRelease( tdoc );                                 
+  return result;                                       
+} 
+
+QString tidy(QString text)
+{
+  return tidy(text.toLocal8Bit().data());
+}
+
+QString cleanwithtidy(QString text)
+// convert the html file file1 into the xhtml file file2.
+{                                                        
+  kDebug() << "Entering function" << text; 
+  kDebug() << "text is " << text;
+  char* input;   
+  QString result;
+  QByteArray textc=text.toLocal8Bit();
+  printf("textc is %s",input);
+  input=textc.data();
+  printf("input is %s",input);
+      char* outputstring; // content of the outputfile                                 
+
+      // find out length of outputstring
+      int length=0; // length of outputstring
+  // the following code is (c) Charles Reitzel and Dave Raggett, see the package tidy                                     
+    TidyBuffer output = {0};                                                         
+    TidyBuffer errbuf = {0};                                                         
+    int rc = -1;                                                                     
+    Bool ok;                                                                         
+
+    TidyDoc tdoc = tidyCreate();                             // Initialize "document"
+    printf( "Tidying:\t\%s\\n", input );                                             
+
+    ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
+    if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
+    if ( rc >= 0 ) rc = tidyParseString( tdoc, input );      // Parse the input    
+    if ( rc >= 0 ) rc = tidyCleanAndRepair( tdoc );          // Tidy it up!        
+    if ( rc >= 0 ) rc = tidyRunDiagnostics( tdoc );          // Kvetch             
+    if ( rc > 1 )                                            // If error, force output.
+      rc = ( tidyOptSetBool(tdoc, TidyForceOutput, yes) ? rc : -1 );                   
+    if ( rc >= 0 ) rc = tidySaveBuffer( tdoc, &output );     // Pretty Print           
+    if ( rc >= 0 )                                                                     
+    {                                                                                  
+      if ( rc > 0 )                                                                    
+        printf( "\\nDiagnostics:\\n\\n\%s", errbuf.bp );                               
+      printf( "\\nAnd here is the result:\\n\\n\%s", output.bp );                      
+      byte* string=output.bp;                
+      while (*string)                        
+      {                                      
+        kDebug() << "byte is " << string << " value " << *string;
+        string++;                                                
+        length++;                                                
+      }
+
+      kDebug() << "allocating memory " << length;
+      outputstring=(char*)malloc(length);
+      kDebug() << "printing output string";
+      snprintf(outputstring,length,"%s",output.bp);
+      kDebug() << "outputstring is " << outputstring;
+    }
+    else
+      printf( "A severe error (\%d) occurred.\\n", rc );
+
+    tidyBufFree( &output );
+    tidyBufFree( &errbuf );
+    tidyRelease( tdoc );
+  result=QString::fromLocal8Bit(outputstring, length);
+  kDebug() << "result is " << result;
+  return result;
+}
+
 QString cleanwithtextedit(QString text)
 {
   QTextEdit* textedit=new QTextEdit();
@@ -35,7 +156,8 @@ QString cleanwithtextedit(QString text)
 
 QString clean(QString text)
 {
-  return cleanwithtextedit(text);
+  //return cleanwithtextedit(text);
+  return tidy(text);
 }
 
 int main (int argc, char *argv[])
