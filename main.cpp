@@ -198,6 +198,10 @@ int main (int argc, char *argv[])
     QDomNode node=bodynode;
     output(bodynode);
   }
-  else std::cout << "html2mediawiki usage: html2mediawiki <htmlfile>" << std::endl;
+  else 
+  {
+    std::cout << "html2mediawiki converts an html file to mediawiki syntax" << std::endl;
+    std::cout << "html2mediawiki usage: html2mediawiki <htmlfile>" << std::endl;
+  }
 }
 
