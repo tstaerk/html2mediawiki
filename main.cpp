@@ -22,7 +22,9 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << "\n= ";
   if (node.nodeName()=="h2") std::cout << "\n== ";
   if (node.nodeName()=="p") std::cout << "\n\n";
+  if (node.nodeName()=="br") std::cout << "\n";
   if (node.nodeName()=="auml") std::cout << "&auml;";
+  if (node.nodeName()=="ouml") std::cout << "&ouml;";
   if (node.isText()) kDebug() << node.nodeValue();
   if (node.isText()) std::cout << QString(node.nodeValue().toUtf8()).toStdString();
   if (node.hasChildNodes()) 
@@ -82,6 +84,7 @@ QString tidy(char* input)
   tidyRelease( tdoc );  
   kDebug() << "============================================================";
   result=result.replace("&Atilde;&curren;","&auml;"); // this is needed if local lang=US and input lang=utf8        
+  result=result.replace("&Atilde;&para;","&ouml;");
   kDebug() << result;
   return result;                                       
 } 
