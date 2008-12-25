@@ -22,8 +22,9 @@ void output(QDomNode node)
   if (node.nodeName()=="h1") std::cout << "\n= ";
   if (node.nodeName()=="h2") std::cout << "\n== ";
   if (node.nodeName()=="p") std::cout << "\n\n";
+  if (node.nodeName()=="auml") std::cout << "&auml;";
   if (node.isText()) kDebug() << node.nodeValue();
-  if (node.isText()) std::cout << QString(node.nodeValue().toLocal8Bit()).toStdString();
+  if (node.isText()) std::cout << QString(node.nodeValue().toUtf8()).toStdString();
   if (node.hasChildNodes()) 
   {
     for (int i=0; i<=node.childNodes().count(); ++i) output(node.childNodes().at(i));
@@ -45,8 +46,8 @@ QString tidy(char* input)
   Bool ok;                                                                                                               
 
   TidyDoc tdoc = tidyCreate();                             // Initialize "document"
-  kDebug() << "Tidying:\t\%s\\n" << input;                                         
-
+  kDebug() << "}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}Tidying:\t\%s\\n" << input;                                         
+  kDebug() << QString::fromUtf8(input);
   ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
   if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
   if ( rc >= 0 ) rc = tidyParseString( tdoc, input );      // Parse the input    
@@ -72,81 +73,22 @@ QString tidy(char* input)
     kDebug() << "allocating memory " << length;
     outputstring=(char*)malloc(length);        
     snprintf(outputstring,length,"%s",output.bp);
-    result=QString::fromLocal8Bit(outputstring,length);
+    result=QString::fromUtf8(outputstring,length);
   }                                                    
   else                                                 
     printf( "A severe error (\%d) occurred.\\n", rc ); 
   tidyBufFree( &output );                              
   tidyBufFree( &errbuf );                              
-  tidyRelease( tdoc );                                 
+  tidyRelease( tdoc );  
+  kDebug() << "============================================================";
+  result=result.replace("&Atilde;&curren;","&auml;"); // this is needed if local lang=US and input lang=utf8        
+  kDebug() << result;
   return result;                                       
 } 
 
 QString tidy(QString text)
 {
-  return tidy(text.toLocal8Bit().data());
-}
-
-QString cleanwithtidy(QString text)
-// convert the html file file1 into the xhtml file file2.
-{                                                        
-  kDebug() << "Entering function" << text; 
-  kDebug() << "text is " << text;
-  char* input;   
-  QString result;
-  QByteArray textc=text.toLocal8Bit();
-  printf("textc is %s",input);
-  input=textc.data();
-  printf("input is %s",input);
-      char* outputstring; // content of the outputfile                                 
-
-      // find out length of outputstring
-      int length=0; // length of outputstring
-  // the following code is (c) Charles Reitzel and Dave Raggett, see the package tidy                                     
-    TidyBuffer output = {0};                                                         
-    TidyBuffer errbuf = {0};                                                         
-    int rc = -1;                                                                     
-    Bool ok;                                                                         
-
-    TidyDoc tdoc = tidyCreate();                             // Initialize "document"
-    printf( "Tidying:\t\%s\\n", input );                                             
-
-    ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
-    if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
-    if ( rc >= 0 ) rc = tidyParseString( tdoc, input );      // Parse the input    
-    if ( rc >= 0 ) rc = tidyCleanAndRepair( tdoc );          // Tidy it up!        
-    if ( rc >= 0 ) rc = tidyRunDiagnostics( tdoc );          // Kvetch             
-    if ( rc > 1 )                                            // If error, force output.
-      rc = ( tidyOptSetBool(tdoc, TidyForceOutput, yes) ? rc : -1 );                   
-    if ( rc >= 0 ) rc = tidySaveBuffer( tdoc, &output );     // Pretty Print           
-    if ( rc >= 0 )                                                                     
-    {                                                                                  
-      if ( rc > 0 )                                                                    
-        printf( "\\nDiagnostics:\\n\\n\%s", errbuf.bp );                               
-      printf( "\\nAnd here is the result:\\n\\n\%s", output.bp );                      
-      byte* string=output.bp;                
-      while (*string)                        
-      {                                      
-        kDebug() << "byte is " << string << " value " << *string;
-        string++;                                                
-        length++;                                                
-      }
-
-      kDebug() << "allocating memory " << length;
-      outputstring=(char*)malloc(length);
-      kDebug() << "printing output string";
-      snprintf(outputstring,length,"%s",output.bp);
-      kDebug() << "outputstring is " << outputstring;
-    }
-    else
-      printf( "A severe error (\%d) occurred.\\n", rc );
-
-    tidyBufFree( &output );
-    tidyBufFree( &errbuf );
-    tidyRelease( tdoc );
-  result=QString::fromLocal8Bit(outputstring, length);
-  kDebug() << "result is " << result;
-  return result;
+  return tidy(text.toUtf8().data());
 }
 
 QString cleanwithtextedit(QString text)
@@ -187,8 +129,11 @@ int main (int argc, char *argv[])
     QFile inputfile(args->url(0).fileName());
     inputfile.open(QIODevice::ReadOnly);
     inputfilecontent = inputfile.read(inputfile.bytesAvailable());
-    QString inputfilecontentqstring(inputfilecontent);
+    QString inputfilecontentqstring=QString::fromUtf8(inputfilecontent);
+    kDebug() << "***************************************" << inputfilecontentqstring;
     QDomDocument mydom=QDomDocument();
+    QString cleanstr=clean(inputfilecontentqstring);
+    kDebug() << ":::::::::::::::::::::::::::::::::::::::::::::::::::" << cleanstr;
     mydom.setContent(clean(inputfilecontentqstring));
     kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
     QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
