@@ -36,7 +36,7 @@ void output(QDomNode node)
   if (node.nodeName()=="h2") std::cout << " ==";
 }
 
-QString tidy(char* input)
+QString tidy(QString input)
 // take html code and return it converted to xhtml code
 {                                                        
   kDebug() << "Entering function";                       
@@ -49,10 +49,10 @@ QString tidy(char* input)
 
   TidyDoc tdoc = tidyCreate();                             // Initialize "document"
   kDebug() << "}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}Tidying:\t\%s\\n" << input;                                         
-  kDebug() << QString::fromUtf8(input);
+  kDebug() << input;
   ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
   if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
-  if ( rc >= 0 ) rc = tidyParseString( tdoc, input );      // Parse the input    
+  if ( rc >= 0 ) rc = tidyParseString( tdoc, input.toUtf8().constData() );      // Parse the input    
   if ( rc >= 0 ) rc = tidyCleanAndRepair( tdoc );          // Tidy it up!        
   if ( rc >= 0 ) rc = tidyRunDiagnostics( tdoc );          // Kvetch             
   if ( rc > 1 )                                            // If error, force output.
@@ -83,15 +83,11 @@ QString tidy(char* input)
   tidyBufFree( &errbuf );                              
   tidyRelease( tdoc );  
   kDebug() << "============================================================";
+  kDebug() << result;
   result=result.replace("&Atilde;&curren;","&auml;"); // this is needed if local lang=US and input lang=utf8        
   result=result.replace("&Atilde;&para;","&ouml;");
   kDebug() << result;
   return result;                                       
-} 
-
-QString tidy(QString text)
-{
-  return tidy(text.toUtf8().data());
 }
 
 QString cleanwithtextedit(QString text)
@@ -103,7 +99,6 @@ QString cleanwithtextedit(QString text)
 
 QString clean(QString text)
 {
-  //return cleanwithtextedit(text);
   return tidy(text);
 }
 
