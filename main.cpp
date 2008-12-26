@@ -25,6 +25,7 @@ void output(QDomNode node)
   if (node.nodeName()=="br") std::cout << "\n";
   if (node.nodeName()=="auml") std::cout << "&auml;";
   if (node.nodeName()=="ouml") std::cout << "&ouml;";
+  if (node.nodeName()=="uuml") std::cout << "&uuml;";
   if (node.isText()) kDebug() << node.nodeValue();
   if (node.isText()) std::cout << QString(node.nodeValue().toUtf8()).toStdString();
   if (node.hasChildNodes()) 
@@ -48,8 +49,6 @@ QString tidy(QString input)
   Bool ok;                                                                                                               
 
   TidyDoc tdoc = tidyCreate();                             // Initialize "document"
-  kDebug() << "}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}Tidying:\t\%s\\n" << input;                                         
-  kDebug() << input;
   ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
   if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
   if ( rc >= 0 ) rc = tidyParseString( tdoc, input.toUtf8().constData() );      // Parse the input    
@@ -81,10 +80,7 @@ QString tidy(QString input)
     printf( "A severe error (\%d) occurred.\\n", rc ); 
   tidyBufFree( &output );                              
   tidyBufFree( &errbuf );                              
-  tidyRelease( tdoc );  
-  kDebug() << "============================================================";
-  kDebug() << result;
-  result=result.replace("&Atilde;&curren;","&auml;"); // this is needed if local lang=US and input lang=utf8        
+  tidyRelease( tdoc );
   result=result.replace("&Atilde;&para;","&ouml;");
   kDebug() << result;
   return result;                                       
@@ -98,7 +94,21 @@ QString cleanwithtextedit(QString text)
 }
 
 QString clean(QString text)
+// this assumes the input is UTF-8 and the endianness is little
 {
+  char auml[3];
+  char uuml[3];
+  auml[0]=195;
+  auml[1]=164;
+  auml[2]=0;
+  uuml[0]=195;
+  uuml[1]=188;
+  uuml[2]=0;
+  QString aumlqstr=QString::fromUtf8(auml,2);
+  QString uumlqstr=QString::fromUtf8(uuml,2);
+  kDebug() << "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((" << aumlqstr;
+  text.replace(aumlqstr,"&auml;");
+  text.replace(uumlqstr,"&uuml;");
   return tidy(text);
 }
 
@@ -127,11 +137,10 @@ int main (int argc, char *argv[])
     QFile inputfile(args->url(0).fileName());
     inputfile.open(QIODevice::ReadOnly);
     inputfilecontent = inputfile.read(inputfile.bytesAvailable());
+    kDebug() << "inputfilecontent.data()[0]"<<(byte)inputfilecontent.data()[0];
+    kDebug() << "inputfilecontent.data()[1]"<<(byte)inputfilecontent.data()[1];
     QString inputfilecontentqstring=QString::fromUtf8(inputfilecontent);
-    kDebug() << "***************************************" << inputfilecontentqstring;
     QDomDocument mydom=QDomDocument();
-    QString cleanstr=clean(inputfilecontentqstring);
-    kDebug() << ":::::::::::::::::::::::::::::::::::::::::::::::::::" << cleanstr;
     mydom.setContent(clean(inputfilecontentqstring));
     kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
     QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
