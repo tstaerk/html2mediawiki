@@ -17,16 +17,11 @@
 void output(QDomNode node)
 {
   QDomNode next;
-  kDebug() << node.nodeName();
   if (node.nodeName()=="li") std::cout << "\n* ";
   if (node.nodeName()=="h1") std::cout << "\n= ";
   if (node.nodeName()=="h2") std::cout << "\n== ";
   if (node.nodeName()=="p") std::cout << "\n\n";
   if (node.nodeName()=="br") std::cout << "\n";
-  if (node.nodeName()=="auml") std::cout << "&auml;";
-  if (node.nodeName()=="ouml") std::cout << "&ouml;";
-  if (node.nodeName()=="uuml") std::cout << "&uuml;";
-  if (node.isText()) kDebug() << node.nodeValue();
   if (node.isText()) std::cout << QString(node.nodeValue().toUtf8()).toStdString();
   if (node.hasChildNodes()) 
   {
@@ -39,8 +34,7 @@ void output(QDomNode node)
 
 QString tidy(QString input)
 // take html code and return it converted to xhtml code
-{                                                        
-  kDebug() << "Entering function";                       
+{                                                                              
   // the following code is (c) Charles Reitzel and Dave Raggett, see the package tidy                                                                                                                                                             
   TidyBuffer output = {0};                                                                                               
   TidyBuffer errbuf = {0};                                                                                               
@@ -59,8 +53,7 @@ QString tidy(QString input)
     rc = ( tidyOptSetBool(tdoc, TidyForceOutput, yes) ? rc : -1 );                   
   if ( rc >= 0 ) rc = tidySaveBuffer( tdoc, &output );     // Pretty Print           
   if ( rc >= 0 )                                                                     
-  {                                                                                  
-    if ( rc > 0 ) kDebug() << "\\nDiagnostics:\\n\\n\%s" << errbuf.bp;               
+  {                                                                                                
     char* outputstring; // content of the outputfile                                 
 
     // find out length of outputstring
@@ -72,7 +65,6 @@ QString tidy(QString input)
       length++;                                                
     }                                                          
 
-    kDebug() << "allocating memory " << length;
     outputstring=(char*)malloc(length);        
     snprintf(outputstring,length,"%s",output.bp);
     result=QString::fromUtf8(outputstring,length);
@@ -83,7 +75,6 @@ QString tidy(QString input)
   tidyBufFree( &errbuf );                              
   tidyRelease( tdoc );
   result=result.replace("&Atilde;&para;","&ouml;");
-  kDebug() << result;
   return result;                                       
 }
 
@@ -121,13 +112,13 @@ int main (int argc, char *argv[])
     QDomDocument mydom=QDomDocument();
     mydom.setContent(tidy(inputfilecontentqstring));
     QDomNode bodynode(mydom.elementsByTagName("body").at(0));
-    QDomNode node=bodynode;
     output(bodynode);
   }
   else 
   {
     std::cout << "html2mediawiki converts an html file to mediawiki syntax" << std::endl;
     std::cout << "html2mediawiki usage: html2mediawiki <htmlfile>" << std::endl;
+    std::cout << "htmlfile must be utf-8 encoded." << std::endl;
   }
 }
 
