@@ -94,12 +94,6 @@ QString cleanwithtextedit(QString text)
   return textedit->toHtml();
 }
 
-QString clean(QString text)
-// this assumes the input is UTF-8 and the endianness is little
-{
-  return tidy(text);
-}
-
 int main (int argc, char *argv[])
 {
   KAboutData aboutData( "html2mediawiki",
@@ -108,7 +102,7 @@ int main (int argc, char *argv[])
 			"0.1",
 			ki18n("Converts html syntax to mediawiki syntax"),
 			KAboutData::License_GPL,
-			ki18n("(c) 2008 by Thorsten Staerk"),
+			ki18n("(c) 2008-2009 by Thorsten Staerk"),
 			ki18n("This is html2mediawiki"),
 			"http://www.staerk.de/thorsten",
 			"bugs@staerk.de");
@@ -121,20 +115,12 @@ int main (int argc, char *argv[])
   KApplication app;
   if (args->count()) 
   {
-    kDebug() << args->url(0).url();
     QFile inputfile(args->url(0).fileName());
     inputfile.open(QIODevice::ReadOnly);
-    inputfilecontent = inputfile.read(inputfile.bytesAvailable());
-    kDebug() << "inputfilecontent.data()[0]"<<(byte)inputfilecontent.data()[0];
-    kDebug() << "inputfilecontent.data()[1]"<<(byte)inputfilecontent.data()[1];
-    QString inputfilecontentqstring=QString::fromUtf8(inputfilecontent);
+    QString inputfilecontentqstring=QString::fromUtf8(inputfile.read(inputfile.bytesAvailable()));
     QDomDocument mydom=QDomDocument();
-    mydom.setContent(clean(inputfilecontentqstring));
-    kDebug() << mydom.elementsByTagName("html").at(0).nodeName();
-    QDomNode htmlnode=mydom.elementsByTagName("html").at(0);
-    kDebug() << htmlnode.firstChild().nodeName();
+    mydom.setContent(tidy(inputfilecontentqstring));
     QDomNode bodynode(mydom.elementsByTagName("body").at(0));
-    kDebug() << bodynode.firstChild().nodeName();
     QDomNode node=bodynode;
     output(bodynode);
   }
