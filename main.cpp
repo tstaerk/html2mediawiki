@@ -51,6 +51,7 @@ QString tidy(QString input)
   TidyDoc tdoc = tidyCreate();                             // Initialize "document"
   ok = tidyOptSetBool( tdoc, TidyXhtmlOut, yes );          // Convert to XHTML
   if ( ok ) rc = tidySetErrorBuffer( tdoc, &errbuf );      // Capture diagnostics
+  tidySetCharEncoding( tdoc, "utf8" );
   if ( rc >= 0 ) rc = tidyParseString( tdoc, input.toUtf8().constData() );      // Parse the input    
   if ( rc >= 0 ) rc = tidyCleanAndRepair( tdoc );          // Tidy it up!        
   if ( rc >= 0 ) rc = tidyRunDiagnostics( tdoc );          // Kvetch             
