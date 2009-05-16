@@ -1,0 +1,3 @@
+To compile html2mediawiki, you need to have the development package of libtidy installed. E.g. for SUSE Linux 11.1 this would go like:
+yast -i libtidy-devel
+cmake . && make -j4 && make install
