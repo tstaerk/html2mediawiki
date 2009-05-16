@@ -97,19 +97,6 @@ QString cleanwithtextedit(QString text)
 QString clean(QString text)
 // this assumes the input is UTF-8 and the endianness is little
 {
-  char auml[3];
-  char uuml[3];
-  auml[0]=195;
-  auml[1]=164;
-  auml[2]=0;
-  uuml[0]=195;
-  uuml[1]=188;
-  uuml[2]=0;
-  QString aumlqstr=QString::fromUtf8(auml,2);
-  QString uumlqstr=QString::fromUtf8(uuml,2);
-  kDebug() << "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((" << aumlqstr;
-  text.replace(aumlqstr,"&auml;");
-  text.replace(uumlqstr,"&uuml;");
   return tidy(text);
 }
 
